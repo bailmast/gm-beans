@@ -1,43 +1,54 @@
 # Beans
-Garry's Mod binding library for SERVER and CLIENT
+
+Garry's Mod binding library for both CLIENT and SERVER
 
 # Usage
-```lua
-local coolPhrase = "Looooool!"
 
-if SERVER then
-  Beans:Assign(KEY_G, "DropSomeCoolPhraseInChat", function(pl)
-    pl:Say(coolPhrase)
-  end, 2)
-else -- CLIENT
-  Beans:Assign(KEY_G, "DropSomeCoolPhraseInChat", function()
-    RunConsoleCommand("say", coolPhrase)
-  end, 2)
+```lua
+if CLIENT then
+  Beans:Assign(KEY_G, "Example")
+    :SetSimple(function()
+      RunConsoleCommand("say", "You pressed [G]!")
+    end)
+
+  Beans:Assign(KEY_G, "ExampleRelease")
+    :SetSimple(function()
+      RunConsoleCommand("say", "You released [G]!")
+    end, true)
+
+  Beans:Assign(KEY_G, "ExampleHold")
+    :SetHold(function()
+      RunConsoleCommand("say", "You held [G] for 2 seconds!")
+    end, 2)
+else -- SERVER
+  Beans:Assign(KEY_G, "ExampleServer")
+    :SetSimple(function(pl)
+      pl:ChatPrint("Hello from the SERVER, you pressed [G]!")
+    end)
 end
 
--- it also can be shared
-Beans:Assign(KEY_F, "yes, it is shared!", function(pl)
-  if SERVER then
-    pl:Say(coolPhrase)
-    return
-  end
+-- SHARED
+Beans:Assign(KEY_F, "ExampleShared")
+  :SetSimple(function(pl)
+    if SERVER then
+      pl:Kill()
+      return
+    end
 
-  -- CLIENT
-  RunConsoleCommand("say", coolPhrase)
-end, 2)
+    RunConsoleCommand("say", "Oh no! I pressed [F]...")
+  end)
 ```
 
 ```lua
 -- you can also disallow usage of the bind in some scenarios
-hook.Add("Beans::ShouldDisallow", "DeadManIsNotCool", function(pClient, nButton, sName)
-  if sName ~= "DropSomeCoolPhraseInChat" then return end
+hook.Add("Beans::ShouldDisallow", "AlreadyDead", function(pClient, nButton, sName)
+  if sName ~= "ExampleShared" then return end
   if pClient:Alive() then return end
 
-  local msg = "You are dead :("
   if SERVER then
-    pClient:ChatPrint(msg)
+    pClient:ChatPrint("No punishment for you this time!")
   else
-    chat.AddText(msg)
+    chat.AddText("No punishment because I'm already dead...")
   end
 
   return true -- to disallow
