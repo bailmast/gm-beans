@@ -6,17 +6,17 @@ Garry's Mod binding library for SERVER and CLIENT
 local coolPhrase = "Looooool!"
 
 if SERVER then
-  Beans:Assing(KEY_G, "DropSomeCoolPhraseInChat", function(pl)
+  Beans:Assign(KEY_G, "DropSomeCoolPhraseInChat", function(pl)
     pl:Say(coolPhrase)
   end, 2)
 else -- CLIENT
-  Beans:Assing(KEY_G, "DropSomeCoolPhraseInChat", function()
+  Beans:Assign(KEY_G, "DropSomeCoolPhraseInChat", function()
     RunConsoleCommand("say", coolPhrase)
   end, 2)
 end
 
 -- it also can be shared
-Beans:Assing(KEY_F, "yes, it is shared!", function(pl)
+Beans:Assign(KEY_F, "yes, it is shared!", function(pl)
   if SERVER then
     pl:Say(coolPhrase)
     return
