@@ -1,6 +1,6 @@
 Beans = Beans or {}
 
-local CURRENT_VERSION = 240107
+local CURRENT_VERSION = 240107.01
 if Beans._VERSION and (Beans._VERSION <= CURRENT_VERSION) then return end
 Beans._VERSION = CURRENT_VERSION
 
@@ -57,19 +57,19 @@ hook.Add("PlayerButtonDown", "Beans::Pressed", function(pClient, nButton)
 	Beans.Pressed[pClient][nButton] = true
 
 	for bindName, bindMeta in pairs(Beans.Stored[nButton]) do
-		if hook.Run("Beans::ShouldDisallow", pClient, nButton, bindName) then return end
-		if bindMeta.OnRelease then goto notOnPressed end
+		if hook.Run("Beans::ShouldDisallow", pClient, nButton, bindName) then goto nextBind end
+		if bindMeta.OnRelease then goto nextBind end
 
 		if bindMeta.Hold then
 			Beans.InProgress[pClient] = Beans.InProgress[pClient] or {}
 			Beans.InProgress[pClient][bindName] = CurTime() + bindMeta.Hold
 
-			goto notOnPressed
+			goto nextBind
 		end
 
 		bindMeta.Callback(pClient)
 
-		::notOnPressed::
+		::nextBind::
 	end
 end)
 
@@ -79,12 +79,12 @@ hook.Add("PlayerButtonUp", "Beans::Depressed", function(pClient, nButton)
 	if not Beans.Pressed[pClient] or not Beans.Pressed[pClient][nButton] then return end
 
 	for bindName, bindMeta in pairs(Beans.Stored[nButton]) do
-		if not bindMeta.OnRelease then goto notOnRelease end
-		if hook.Run("Beans::ShouldDisallow", pClient, nButton, bindName) then return end
+		if not bindMeta.OnRelease then goto nextBind end
+		if hook.Run("Beans::ShouldDisallow", pClient, nButton, bindName) then goto nextBind end
 
 		bindMeta.Callback(pClient)
 
-		::notOnRelease::
+		::nextBind::
 	end
 
 	do
