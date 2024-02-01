@@ -35,6 +35,7 @@ Beans:Assign(KEY_F, "ExampleShared")
       return
     end
 
+    -- CLIENT
     RunConsoleCommand("say", "Oh no! I pressed [F]...")
   end)
 ```
@@ -47,7 +48,7 @@ hook.Add("Beans::ShouldDisallow", "AlreadyDead", function(pClient, nButton, sNam
 
   if SERVER then
     pClient:ChatPrint("No punishment for you this time!")
-  else
+  else -- CLIENT
     chat.AddText("No punishment because I'm already dead...")
   end
 
