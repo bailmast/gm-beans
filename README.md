@@ -26,7 +26,7 @@ else -- SERVER
       pl:ChatPrint("Hello from the SERVER, you pressed [G]!")
     end)
 
-  Beans:Assign(KEY_H, "ExampleToggleRelease")
+  Beans:Assign(KEY_H, "ExampleToggle")
     :SetToggle(function(pl, toggled)
       pl:ChatPrint("SERVER: [G] -> " .. (toggled and "" or "Un") .. "Toggled")
     end)
