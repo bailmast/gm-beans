@@ -1,6 +1,6 @@
 Beans = Beans or {}
 
-local CURRENT_VERSION = 240201
+local CURRENT_VERSION = 240210
 if Beans._VERSION and (Beans._VERSION <= CURRENT_VERSION) then return end
 Beans._VERSION = CURRENT_VERSION
 
