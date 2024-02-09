@@ -10,6 +10,7 @@ Beans.StoredNames = Beans.StoredNames or {}
 
 Beans.Pressed = Beans.Pressed or {}
 Beans.InProgress = Beans.InProgress or {}
+Beans.Toggled = Beans.Toggled or {}
 
 local STORED_META = {}
 STORED_META.__index = STORED_META
@@ -28,18 +29,38 @@ function Beans:Assign(keyCode, bindName)
 	return bindMeta
 end
 
----@param callback fun(pl?: Player)
+---@param cback fun(pl?: Player)
 ---@param onRelease? boolean @Should the bind only activate when the key is released.
-function STORED_META:SetSimple(callback, onRelease)
-	self.Callback = callback
+function STORED_META:SetSimple(cback, onRelease)
+	self.Callback = cback
 	self.OnRelease = onRelease
 end
 
----@param callback fun(pl?: Player)
+---@param cback fun(pl?: Player)
 ---@param holdTime number @How long (in seconds) the player must hold down the key.
-function STORED_META:SetHold(callback, holdTime)
-	self.Callback = callback
+function STORED_META:SetHold(cback, holdTime)
+	self.Callback = cback
 	self.Hold = holdTime
+end
+
+---@param cback fun(pl?: Player, toggled: boolean)
+---@param onRelease boolean
+function STORED_META:SetToggle(cback, onRelease)
+	self.Callback = cback
+	self.Toggle = true
+	self.OnRelease = onRelease
+end
+
+local function handleToggle(client, bindName, bindMeta)
+	Beans.Toggled[client] = Beans.Toggled[client] or {}
+
+	if Beans.Toggled[client][bindName] == nil then
+		Beans.Toggled[client][bindName] = CurTime()
+		bindMeta.Callback(client, true)
+	else
+		Beans.Toggled[client][bindName] = nil
+		bindMeta.Callback(client, false)
+	end
 end
 
 hook.Add("PlayerButtonDown", "Beans::Pressed", function(pClient, nButton)
@@ -54,7 +75,11 @@ hook.Add("PlayerButtonDown", "Beans::Pressed", function(pClient, nButton)
 		if bindMeta.Hold then
 			Beans.InProgress[pClient] = Beans.InProgress[pClient] or {}
 			Beans.InProgress[pClient][bindName] = CurTime() + bindMeta.Hold
+			goto nextBind
+		end
 
+		if bindMeta.Toggle then
+			handleToggle(pClient, bindName, bindMeta, true)
 			goto nextBind
 		end
 
@@ -84,6 +109,11 @@ hook.Add("PlayerButtonUp", "Beans::Depressed", function(pClient, nButton)
 		if not bindMeta.OnRelease then goto nextBind end
 		if hook.Run("Beans::ShouldDisallow", pClient, nButton, bindName) then goto nextBind end
 
+		if bindMeta.Toggle then
+			handleToggle(pClient, bindName, bindMeta, false)
+			goto nextBind
+		end
+
 		bindMeta.Callback(pClient)
 
 		::nextBind::
@@ -96,7 +126,6 @@ hook.Add("Think", "Beans::Progress", function()
 			if CurTime() < actTime then goto notYet end
 
 			Beans.InProgress[actor][bindName] = nil
-
 			Beans.Stored[Beans.StoredNames[bindName]][bindName].Callback(actor)
 
 			::notYet::
@@ -104,9 +133,10 @@ hook.Add("Think", "Beans::Progress", function()
 	end
 end)
 
-if CLIENT then return end
-
-hook.Add("PlayerDisconnected", "Beans::ClearTables", function(pl)
-	Beans.Pressed[pl] = nil
-	Beans.InProgress[pl] = nil
-end)
+if SERVER then
+	hook.Add("PlayerDisconnected", "Beans::ClearTables", function(pClient)
+		Beans.Pressed[pClient] = nil
+		Beans.InProgress[pClient] = nil
+		Beans.Toggled[pClient] = nil
+	end)
+end

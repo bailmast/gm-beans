@@ -1,6 +1,6 @@
 # Beans
 
-Garry's Mod binding library for both CLIENT and SERVER
+Garry's Mod binding library for both `CLIENT` and `SERVER`
 
 # Usage
 
@@ -25,6 +25,16 @@ else -- SERVER
     :SetSimple(function(pl)
       pl:ChatPrint("Hello from the SERVER, you pressed [G]!")
     end)
+
+  Beans:Assign(KEY_H, "ExampleToggleRelease")
+    :SetToggle(function(pl, toggled)
+      pl:ChatPrint("SERVER: [G] -> " .. toggled and "" or "Un" .. "Toggled")
+    end)
+
+  Beans:Assign(KEY_J, "ExampleToggleRelease")
+    :SetToggle(function(pl, toggled)
+      pl:ChatPrint("SERVER: [J] -> " .. toggled and "" or "Un" .. "Toggled on Release")
+    end, true)
 end
 
 -- SHARED
