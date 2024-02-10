@@ -5,62 +5,49 @@ Garry's Mod binding library for both `CLIENT` and `SERVER`
 # Usage
 
 ```lua
-if CLIENT then
-  Beans:Assign(KEY_G, "Example")
-    :SetSimple(function()
-      RunConsoleCommand("say", "You pressed [G]!")
+if SERVER then
+  Beans:Assign(KEY_H, 'ExampleToggled')
+    :Toggle(function(pl, toggled)
+      pl:ChatPrint('SERVER: [H] -> ' .. (toggled and '' or 'Un') .. 'Toggled!')
     end)
 
-  Beans:Assign(KEY_G, "ExampleRelease")
-    :SetSimple(function()
-      RunConsoleCommand("say", "You released [G]!")
-    end, true)
-
-  Beans:Assign(KEY_G, "ExampleHold")
-    :SetHold(function()
-      RunConsoleCommand("say", "You held [G] for 2 seconds!")
-    end, 2)
-else -- SERVER
-  Beans:Assign(KEY_G, "ExampleServer")
-    :SetSimple(function(pl)
-      pl:ChatPrint("Hello from the SERVER, you pressed [G]!")
+  Beans:Assign(KEY_J, 'ExampleHold')
+    :Hold(function(pl)
+      pl:ChatPrint('SERVER: [J] -> Two and a half seconds!')
+    end, 2.5)
+else -- CLIENT
+  Beans:Assign(KEY_G, 'ExamplePressed')
+    :Simple(function()
+      chat.AddText('CLIENT: [G] -> Pressed!')
     end)
 
-  Beans:Assign(KEY_H, "ExampleToggle")
-    :SetToggle(function(pl, toggled)
-      pl:ChatPrint("SERVER: [G] -> " .. (toggled and "" or "Un") .. "Toggled")
-    end)
-
-  Beans:Assign(KEY_J, "ExampleToggleRelease")
-    :SetToggle(function(pl, toggled)
-      pl:ChatPrint("SERVER: [J] -> " .. (toggled and "" or "Un") .. "Toggled on Release")
+  Beans:Assign(KEY_G, 'ExampleReleased')
+    :Simple(function()
+      chat.AddText('CLIENT: [G] -> Released!')
     end, true)
 end
 
 -- SHARED
-Beans:Assign(KEY_F, "ExampleShared")
-  :SetSimple(function(pl)
+Beans:Assign(KEY_O, 'ExampleShared')
+  :Simple(function(pl)
     if SERVER then
       pl:Kill()
+      pl:ChatPrint("SERVER -> You: I've killed you!")
       return
     end
 
     -- CLIENT
-    RunConsoleCommand("say", "Oh no! I pressed [F]...")
+    chat.AddText("CLIENT: I'm dead now...")
   end)
 ```
 
 ```lua
--- you can also disallow usage of the bind in some scenarios
-hook.Add("Beans::ShouldDisallow", "AlreadyDead", function(pClient, nButton, sName)
-  if sName ~= "ExampleShared" then return end
-  if pClient:Alive() then return end
+-- You can also disallow usage of bind in some scenarios.
 
-  if SERVER then
-    pClient:ChatPrint("No punishment for you this time!")
-  else -- CLIENT
-    chat.AddText("No punishment because I'm already dead...")
-  end
+-- SHARED
+hook.Add('Beans::ShouldDisallow', 'ExampleShared', function(pl, btn, name)
+  if pl:Alive() then return end
+  if name ~= 'ExampleShared' then return end
 
   return true -- to disallow
 end)
