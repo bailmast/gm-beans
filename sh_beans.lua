@@ -76,8 +76,8 @@ hook.Add('Think', 'Beans::Hold', function()
   for ply, held in pairs(Beans.Held) do
     for meta, state in pairs(held) do
       if state ~= true and ((state + meta.HoldTime) <= CurTime()) then
-        meta.Callback(ply)
         held[meta] = true
+        meta.Callback(ply)
       end
     end
   end

@@ -37,7 +37,7 @@ Beans:Assign(KEY_O, 'ExampleShared')
     end
 
     -- CLIENT
-    chat.AddText("CLIENT: I'm dead now...")
+    chat.AddText("CLIENT: I'm gonna die... (client will execute this faster btw)")
   end)
 ```
 
@@ -46,8 +46,8 @@ Beans:Assign(KEY_O, 'ExampleShared')
 
 -- SHARED
 hook.Add('Beans::ShouldDisallow', 'ExampleShared', function(pl, btn, name)
-  if pl:Alive() then return end
   if name ~= 'ExampleShared' then return end
+  if pl:Alive() then return end
 
   return true -- to disallow
 end)
